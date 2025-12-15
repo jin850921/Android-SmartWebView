@@ -1,0 +1,36 @@
+name: Build TV Store APK
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # 設定 Java 環境 (使用 JDK 17 以相容較新的 Android 工具)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    # 【關鍵修復】賦予 gradlew 執行權限，避免 "Permission denied" 錯誤
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # 開始打包 APK (Debug 版本)
+    - name: Build with Gradle
+      run: ./gradlew assembleDebug --stacktrace
+
+    # 上傳打包好的 APK 到 GitHub 網頁供下載
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: TV-Store-App
+        path: app/build/outputs/apk/debug/app-debug.apk
